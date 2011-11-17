@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # transforms an ABC file to c music data. Not very sofisticated, will probably.
-# choke on complex or malfomed ABC files.
+# choke on complex or malfomed ABC files. 
+# Notably, it requires the abc file to be set in C major.
+# Other key setting will not be transposed and will sound wrong.
 require 'strscan'
 
 fin   = ARGV[0]
@@ -140,13 +142,13 @@ def scan_duration
   halfdot = @scanner.scan(%r{<})
   if halfdot
     pending_duration_divide(2)
-    @next_duration = Rational(3,2)
+    @next_duration *= Rational(3,2)
     return true
   end
   dothalf = @scanner.scan(%r{>})
   if dothalf
     pending_duration_dot
-    @next_duration = Rational(3,2)
+    @next_duration *= Rational(1,2)
     return true
   end
   return false
@@ -180,6 +182,7 @@ def scan_bar
   bar = @scanner.scan(%r{[|]})
   if bar
     store_pending
+    @notes << :break
     return true
   end
   return false
@@ -213,21 +216,27 @@ for line in lines do
 end
 
 
-printf "uint8_t PROGMEM MUSIC_#{cname}[] = {"
+puts "uint8_t PROGMEM MUSIC_#{cname}[] = {"
 
 first = true
 count = 0
-for note in @notes do
+for note in @notes do  
   if first
     first = false
   else
-    printf(", ")
+    if note != :break
+      printf(", ")
+    end
   end
-  printf(note.to_pi_c)
+  if note == :break
+    puts('')
+  else
+    printf(note.to_pi_c)
+  end
   count += 1
-  if (count % 8) == 0
-    puts
-  end
+#   if (count % 8) == 0
+#     puts
+#   end
 end
 
 puts "};\n\n"
