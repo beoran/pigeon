@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+fin   = ARGV[0]
+out   = $stdout
+
+data  = File.read(fin)
+raise "Could not read file #{fin}" unless data
+lines = data.split("\n")
+size  = lines[2]
+aid   = size.split(' ')
+wide  = aid[0].to_i
+high  = aid[1].to_i
+p wide, high
+bits  = lines[3..(lines.size)].join('')
+bytes = wide * high / 8 # XXX: image height or width must be multiples of 8
+cname = fin.split('.').first.upcase
+
+puts "#define IMAGE_#{cname}_HIGH #{high}"
+puts "#define IMAGE_#{cname}_WIDE #{wide}"
+
+nl_after = 6
+first    = true
+puts "static unsigned char __attribute__ ((progmem)) IMAGE_#{cname}_BMP[] = {"
+(0...bytes).each do |index|
+  printf "\n" if ((index % nl_after) == 0)
+  if first
+    first = false
+  else
+    printf(", ")
+  end
+  start = index * 8
+  part  = bits[start, 8]
+  printf "0xb#{part}"
+end
+puts "\n};"
+
+
+
+
+
+
+

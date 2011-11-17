@@ -1,0 +1,246 @@
+#!/usr/bin/env ruby
+# transforms an ABC file to c music data. Not very sofisticated, will probably.
+# choke on complex or malfomed ABC files.
+require 'strscan'
+
+fin   = ARGV[0]
+out   = $stdout
+
+data  = File.read(fin)
+raise "Could not read file #{fin}" unless data
+data.gsub!(/\%[^\r\n]*[\r\n]/,'') # strip comments
+lines = data.split("\n")
+cname = fin.split('.').first.upcase
+
+
+def header?(line)
+  return nil, nil if line !~ /[A-Za-z]:/
+  return line[0], line[2, line.size].strip
+end
+
+# use rational numbers, i's easier for notes. 
+@tempo = Rational(1, 8)
+
+def do_header(k, v)
+  case k
+  when 'L'
+    t, n = v.split('/')
+    @tempo = Rational(t.to_i, n.to_i)
+  end
+end
+
+Note = Struct.new(:name, :octave, :duration)
+
+class Note
+  def inspect
+    return "#{self.name}#{self.octave} #{self.duration}"
+  end
+  
+  def to_pi_c
+    du = "PI_" + self.duration.to_s.gsub('/', '_')
+    no = "PI_#{self.name}#{self.octave}"
+    return "#{no}, #{du}"
+  end
+end
+
+
+@notes = []
+@note_pending  = nil
+@next_duration = Rational(1,1)
+  
+def store_pending
+  return nil unless @note_pending
+  @notes        << @note_pending
+  @note_pending  = nil  
+  return true
+end
+
+def new_pending(name, octave = 4)
+  @note_pending  = Note.new(name, octave, @tempo * @next_duration)
+  @next_duration = Rational(1,1)
+end
+
+def pending_duration_multiply(by)
+  @note_pending.duration *= by
+end
+
+def pending_duration_divide(by)
+  @note_pending.duration *= Rational(1, by)
+end
+
+def pending_duration_half
+  @note_pending.duration /= 2
+end
+
+def pending_duration_dot
+  @note_pending.duration *= Rational(3, 2)
+end
+
+
+def pending_octave_down()
+  @note_pending.octave -= 1
+  return @note_pending.octave 
+end
+
+def pending_octave_up()
+  @note_pending.octave += 1
+  return @note_pending.octave 
+end
+
+  @dividing = false
+
+def scan_junk
+  @scanner.scan(%r{.}) # scan unknown junk
+end
+
+def scan_updown
+  up  = @scanner.scan(%r{[']})
+  if up
+    pending_octave_up
+    return true
+  end
+  down  = @scanner.scan(%r{[,]})
+  if down
+    pending_octave_down
+    return true
+  end
+end
+
+def scan_duration
+  ratio = @scanner.scan(%r{[0-9]+/[0-9]+})
+  if ratio
+    t, n = ratio.split('/').map(&:to_i)
+    pending_duration_multiply(Rational(t, n))
+    return trye
+  end
+  
+  ratio = @scanner.scan(%r{/[0-9]+})
+  if ratio
+    t, n = ratio.split('/').map(&:to_i)
+    pending_duration_multiply(Rational(1, n))
+    return true
+  end
+
+  ratio = @scanner.scan(%r{[0-9]+})
+  if ratio
+    pending_duration_multiply(ratio.to_i)
+    return true
+  end
+
+  quarter = @scanner.scan(%r{//})
+  if quarter
+    pending_duration_divide(4)
+    return true
+  end
+  half = @scanner.scan(%r{/})
+  if half
+    pending_duration_divide(2)
+    return true    
+  end
+  halfdot = @scanner.scan(%r{<})
+  if halfdot
+    pending_duration_divide(2)
+    @next_duration = Rational(3,2)
+    return true
+  end
+  dothalf = @scanner.scan(%r{>})
+  if dothalf
+    pending_duration_dot
+    @next_duration = Rational(3,2)
+    return true
+  end
+  return false
+end
+
+OCTAVE_OF = {
+  'A' => 4, 'B' => 4, 'C' => 4, 'D' => 4, 'E' => 4, 'F' => 4, 'G' => 4,
+  'a' => 5, 'b' => 5, 'c' => 5, 'd' => 5, 'e' => 5, 'f' => 5, 'g' => 5
+ }
+  
+def scan_note
+  note = @scanner.scan(%r{[a-gA-G]})
+  if note
+    store_pending
+    new_pending(note.upcase, OCTAVE_OF[note])
+    return true
+  end
+  return false
+end
+
+def scan_rest
+  rest = @scanner.scan(%r{[zZx]})
+  if rest
+    store_pending
+    new_pending('REST', nil)
+    return true
+  end  
+end
+
+def scan_bar
+  bar = @scanner.scan(%r{[|]})
+  if bar
+    store_pending
+    return true
+  end
+  return false
+end
+
+def do_music(line)
+  @scanner = StringScanner.new(line)
+  until @scanner.eos?
+    case true
+    when scan_rest
+    when scan_note
+    when scan_updown
+    when scan_duration
+    when scan_bar
+    else
+      scan_junk
+    end  
+  end
+end
+
+
+
+
+for line in lines do
+  k, v = header?(line)
+  if k
+    do_header(k, v)
+  else
+    do_music(line)
+  end
+end
+
+
+printf "uint8_t PROGMEM MUSIC_#{cname}[] = {"
+
+first = true
+count = 0
+for note in @notes do
+  if first
+    first = false
+  else
+    printf(", ")
+  end
+  printf(note.to_pi_c)
+  count += 1
+  if (count % 8) == 0
+    puts
+  end
+end
+
+puts "};\n\n"
+puts "#define MUSIC_#{cname}_SIZE #{count * 2}"
+puts "#define MUSIC_#{cname}_NOTES #{count}"
+
+  
+  
+
+
+
+
+
+
+
+

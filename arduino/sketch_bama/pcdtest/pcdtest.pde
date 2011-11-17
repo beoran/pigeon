@@ -1,4 +1,5 @@
 #include "PCD8544.h"
+#include "TimerOne.h"
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdlib.h>
@@ -19,11 +20,12 @@ static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
 #define LOGO16_GLCD_HEIGHT 16 
 #define LOGO16_GLCD_WIDTH  16 
 
+#define PI_PROGMEM __attribute__((progmem))
+
 #define OBAMA_HIGH 48
 #define OBAMA_WIDE 48
-static unsigned char __attribute__ ((progmem)) OBAMA_BMP[] = {
-
-0B00000000, 0B00000000, 0B00001111, 0B11110000, 0B00000000, 0B00000000
+static unsigned char PI_PROGMEM OBAMA_BMP[] = {
+  0B00000000, 0B00000000, 0B00001111, 0B11110000, 0B00000000, 0B00000000
 , 0B00000000, 0B00000000, 0B00110111, 0B11111100, 0B00000000, 0B00000000
 , 0B00000000, 0B00000000, 0B11111111, 0B11111110, 0B00000000, 0B00000000
 , 0B00000000, 0B00000001, 0B01011111, 0B11111111, 0B10000000, 0B00000000
@@ -31,14 +33,14 @@ static unsigned char __attribute__ ((progmem)) OBAMA_BMP[] = {
 , 0B00000000, 0B00000101, 0B01111111, 0B11111111, 0B11100000, 0B00000000
 , 0B00000000, 0B00001111, 0B11111111, 0B11111111, 0B11110000, 0B00000000
 , 0B00000000, 0B00010111, 0B10000001, 0B11111111, 0B11111000, 0B00000000
-, 0B00000000, 0B00111100, 0B00100000, 0B00010000, 0B11111000, 0B00000000
+, 0B00000000, 0B00111100, 0B00000000, 0B00010000, 0B11111000, 0B00000000
 , 0B00000000, 0B00111000, 0B00000100, 0B01000100, 0B01011000, 0B00000000
 , 0B00000000, 0B01101000, 0B00000000, 0B00010001, 0B01111100, 0B00000000
-, 0B00000000, 0B01111001, 0B00000000, 0B01000100, 0B01101100, 0B00000000
-, 0B00000000, 0B01110000, 0B00100001, 0B00010001, 0B01111100, 0B00000000
+, 0B00000000, 0B01111000, 0B00000000, 0B01000100, 0B01101100, 0B00000000
+, 0B00000000, 0B01110000, 0B00000001, 0B00010001, 0B01111100, 0B00000000
 , 0B00000000, 0B01010000, 0B00000000, 0B01000100, 0B01110100, 0B00000000
 , 0B00000000, 0B01100000, 0B00000000, 0B00010001, 0B00111100, 0B00000000
-, 0B00000000, 0B01101001, 0B00000100, 0B00000100, 0B01011100, 0B00000000
+, 0B00000000, 0B01100000, 0B00000100, 0B00000100, 0B01011100, 0B00000000
 , 0B00000000, 0B01100000, 0B00000000, 0B10000000, 0B00011000, 0B00000000
 , 0B00000000, 0B00100001, 0B11100000, 0B00001111, 0B10011000, 0B00000000
 , 0B00000000, 0B01100011, 0B11110000, 0B00011111, 0B11001100, 0B00000000
@@ -48,14 +50,14 @@ static unsigned char __attribute__ ((progmem)) OBAMA_BMP[] = {
 , 0B00000001, 0B01010000, 0B00010000, 0B10000000, 0B00010101, 0B00000000
 , 0B00000001, 0B00100000, 0B00000100, 0B10010000, 0B01001001, 0B00000000
 , 0B00000000, 0B10000000, 0B00100000, 0B01000101, 0B00001010, 0B00000000
-, 0B00000000, 0B10010100, 0B10001000, 0B01000000, 0B01001010, 0B00000000
+, 0B00000000, 0B10010000, 0B10001000, 0B01000000, 0B01001010, 0B00000000
 , 0B00000000, 0B01000000, 0B00000000, 0B00100001, 0B00010100, 0B00000000
 , 0B00000000, 0B01010000, 0B00010000, 0B00100100, 0B01010100, 0B00000000
 , 0B00000000, 0B00110000, 0B00001100, 0B11001001, 0B00011000, 0B00000000
-, 0B00000000, 0B00001010, 0B01000011, 0B00001000, 0B01010000, 0B00000000
+, 0B00000000, 0B00001000, 0B01000011, 0B00001000, 0B01010000, 0B00000000
 , 0B00000000, 0B00001000, 0B10010000, 0B00000101, 0B00100000, 0B00000000
 , 0B00000000, 0B00001000, 0B00000000, 0B01000010, 0B00100000, 0B00000000
-, 0B00000000, 0B00001001, 0B00000000, 0B00000011, 0B01000000, 0B00000000
+, 0B00000000, 0B00001000, 0B00000000, 0B00000011, 0B01000000, 0B00000000
 , 0B00000000, 0B00000100, 0B00011100, 0B11100010, 0B01000000, 0B00000000
 , 0B00000000, 0B00000101, 0B01111111, 0B11111010, 0B10000000, 0B00000000
 , 0B00000000, 0B00000010, 0B00011000, 0B01100001, 0B10000000, 0B00000000
@@ -63,9 +65,9 @@ static unsigned char __attribute__ ((progmem)) OBAMA_BMP[] = {
 , 0B00000000, 0B00000010, 0B10100000, 0B00001010, 0B11000000, 0B00000000
 , 0B00000000, 0B00000010, 0B10000010, 0B00100101, 0B11100000, 0B00000000
 , 0B00000000, 0B00000010, 0B01000000, 0B10001110, 0B10010000, 0B00000000
-, 0B00000000, 0B00001110, 0B10100010, 0B00010101, 0B00011000, 0B00000000
+, 0B00000000, 0B00001110, 0B00100010, 0B00010101, 0B00011000, 0B00000000
 , 0B00000000, 0B01111101, 0B00010000, 0B00101010, 0B00111100, 0B00000000
-, 0B00000011, 0B11111101, 0B01001111, 0B11010100, 0B00111110, 0B00000000
+, 0B00000011, 0B11111101, 0B00001111, 0B11010100, 0B00111110, 0B00000000
 , 0B00011111, 0B11111100, 0B10010010, 0B10111000, 0B01111111, 0B00000000
 , 0B11111111, 0B11111100, 0B10000101, 0B01110000, 0B01111111, 0B11000000
 , 0B11111111, 0B11111100, 0B01010000, 0B11000000, 0B11111111, 0B11110000
@@ -74,13 +76,356 @@ static unsigned char __attribute__ ((progmem)) OBAMA_BMP[] = {
 };
 
 
-void setup(void) {
-  
-  Serial.begin(9600);
-  
-  Serial.println("Start!");
 
+
+/** Period of the notes, starting from C0, including half notes like C#0, etc.  */
+static uint16_t PI_PROGMEM PI_NOTE_PERIOD[] = {
+  30581, 28869, 27248, 25707, 24272, 22905, 21627, 20408, 19261, 18182, 17159, 16197, 
+  15291, 14430, 13621, 12857, 12136, 11455, 10811, 10204,  9632,  9091,  8581,  8099, 
+   7644,  7215,  6810,  6429,  6067,  5727,  5406,  5102,  4816,  4546,  4291,  4050, 
+   3823,  3608,  3406,  3214,  3034,  2864,  2703,  2551,  2408,  2273,  2145,  2025, 
+   1911,  1804,  1703,  1607,  1517,  1432,  1352,  1276,  1204,  1137,  1073,  1013, 
+    956,   902,   852,   804,   759,   716,   676,   638,   602,   568,   537,   506, 
+    478,   451,   426,   402,   379,   358,   338,   319,   301,   284,   268,   253, 
+    239,   226,   213,   201,   190,   179,   169,   160,   151,   142,   134,   127,
+    120,   113,   107,   101
+};
+
+/** Definitions for note constants, and for a rest. */
+#define PI_REST         0
+#define PI_C0           1
+#define PI_CS0          2
+#define PI_D0           3
+#define PI_DS0          4
+#define PI_E0           5
+#define PI_F0           6
+#define PI_FS0          7
+#define PI_G0           8
+#define PI_GS0          9
+#define PI_A0           10
+#define PI_AS0          11
+#define PI_B0           12
+#define PI_C1           13
+#define PI_CS1          14
+#define PI_D1           15
+#define PI_DS1          16
+#define PI_E1           17
+#define PI_F1           18
+#define PI_FS1          19
+#define PI_G1           20
+#define PI_GS1          21
+#define PI_A1           22
+#define PI_AS1          23
+#define PI_B1           24
+#define PI_C2           25
+#define PI_CS2          26
+#define PI_D2           27
+#define PI_DS2          28
+#define PI_E2           29
+#define PI_F2           30
+#define PI_FS2          31
+#define PI_G2           32
+#define PI_GS2          33
+#define PI_A2           34
+#define PI_AS2          35
+#define PI_B2           36
+#define PI_C3           37
+#define PI_CS3          38
+#define PI_D3           39
+#define PI_DS3          40
+#define PI_E3           41
+#define PI_F3           42
+#define PI_FS3          43
+#define PI_G3           44
+#define PI_GS3          45
+#define PI_A3           46
+#define PI_AS3          47
+#define PI_B3           48
+#define PI_C4           49
+#define PI_CS4          50
+#define PI_D4           51
+#define PI_DS4          52
+#define PI_E4           53
+#define PI_F4           54
+#define PI_FS4          55
+#define PI_G4           56
+#define PI_GS4          57
+#define PI_A4           58
+#define PI_AS4          59
+#define PI_B4           60
+#define PI_C5           61
+#define PI_CS5          62
+#define PI_D5           63
+#define PI_DS5          64
+#define PI_E5           65
+#define PI_F5           66
+#define PI_FS5          67
+#define PI_G5           68
+#define PI_GS5          69
+#define PI_A5           70
+#define PI_AS5          71
+#define PI_B5           72
+#define PI_C6           73
+#define PI_CS6          74
+#define PI_D6           75
+#define PI_DS6          76
+#define PI_E6           77
+#define PI_F6           78
+#define PI_FS6          79
+#define PI_G6           80
+#define PI_GS6          81
+#define PI_A6           82
+#define PI_AS6          83
+#define PI_B6           84
+#define PI_C7           85
+#define PI_CS7          86
+#define PI_D7           87
+#define PI_DS7          88
+#define PI_E7           89
+#define PI_F7           90
+#define PI_FS7          91
+#define PI_G7           92
+#define PI_GS7          93
+#define PI_A7           94
+#define PI_AS7          95
+#define PI_B7           96
+#define PI_C8           97
+#define PI_CS8          98
+#define PI_D8           99
+#define PI_DS8          100
+
+/** Convenience notes */
+#define PI_C_           PI_C3
+#define PI_D_           PI_D3
+#define PI_E_           PI_E3
+#define PI_F_           PI_F3
+#define PI_G_           PI_G3
+#define PI_A_           PI_A4
+#define PI_B_           PI_B4
+#define PI_C            PI_C4
+#define PI_D            PI_D4
+#define PI_E            PI_E4
+#define PI_F            PI_F4
+#define PI_G            PI_G4
+#define PI_A            PI_A5
+#define PI_B            PI_B5
+#define PI_c            PI_C5
+#define PI_d            PI_D5
+#define PI_e            PI_E5
+#define PI_f            PI_F5
+#define PI_g            PI_G5
+#define PI_a            PI_A6
+#define PI_b            PI_B6
+
+
+/** Defines for relative note durations. Notation for a A/B note is PI_A_B.
+* Note durations up to 1/64 are supported, although not dotted (1/32 can be dotted )
+* There is no notation of length zero since that is useless. 
+* The notation uses duration+1/64 as a whole note, hence duration is 
+* (tempo * (duration) + tempo) / 64 or tempo * (duration) + tempo) >> 64
+*/
+
+#define PI_1_64         1
+#define PI_1_32         2
+#define PI_3_32         3
+#define PI_1_16         4
+#define PI_3_16         6
+#define PI_1_8          8
+#define PI_2_8          16
+#define PI_3_8          12
+#define PI_1_4          16
+#define PI_3_4          24
+#define PI_1_2          32
+#define PI_3_2          96
+#define PI_1_1          64
+#define PI_2_1          128
+#define PI_3_1          192
+
+/*
+X: 1
+T: Hail to the Chief
+C: James Sanderson (ca.1810)
+M: C
+L: 1/8
+K: Bb
+|: z2 \
+| F2 G>A B2 AG | F>G FD C2 B,2 | F2 B>c d2 cB | c>B cd cB AG \
+| F2 G>A B2 AG | F>G FD C2 B,2 | F2 B>A GB DF | F2 B>c B2 :|
+|: Bc \
+| d2 d>d d2 ed | c>=B cd cA F2 | d2 d>d ed cB | c2 f>f fe dc \
+| B2 B>A G>A BG | F2 B>c d2 cB | G>A BG F>G FD | F2 B>c B2 :|
+*/
+
+#define PI_LED_PIN       13
+#define PI_PIEZO_PIN     9 
+
+
+
+uint8_t PROGMEM MUSIC_HAIL_TO_THE_CHIEF[] = {
+  PI_REST, PI_1_4, PI_F4, PI_1_4, PI_G4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_1_4, PI_A4, PI_1_8, PI_G4, PI_1_8, PI_F4, PI_3_16
+, PI_G4, PI_3_16, PI_F4, PI_1_8, PI_D4, PI_1_8, PI_C4, PI_1_4, PI_B3, PI_1_4, PI_F4, PI_1_4, PI_B4, PI_3_16, PI_C5, PI_3_16
+, PI_D5, PI_1_4, PI_C5, PI_1_8, PI_B4, PI_1_8, PI_C5, PI_3_16, PI_B4, PI_3_16, PI_C5, PI_1_8, PI_D5, PI_1_8, PI_C5, PI_1_8
+, PI_B4, PI_1_8, PI_A4, PI_1_8, PI_G4, PI_1_8, PI_F4, PI_1_4, PI_G4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_1_4, PI_A4, PI_1_8
+, PI_G4, PI_1_8, PI_F4, PI_3_16, PI_G4, PI_3_16, PI_F4, PI_1_8, PI_D4, PI_1_8, PI_C4, PI_1_4, PI_B3, PI_1_4, PI_F4, PI_1_4
+, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_G4, PI_1_8, PI_B4, PI_1_8, PI_D4, PI_1_8, PI_F4, PI_1_8, PI_F4, PI_1_4, PI_B4, PI_3_16
+, PI_C5, PI_3_16, PI_B4, PI_1_4, PI_B4, PI_1_8, PI_C5, PI_1_8, PI_D5, PI_1_4, PI_D5, PI_3_16, PI_D5, PI_3_16, PI_D5, PI_1_4
+, PI_E5, PI_1_8, PI_D5, PI_1_8, PI_C5, PI_3_16, PI_B4, PI_3_16, PI_C5, PI_1_8, PI_D5, PI_1_8, PI_C5, PI_1_8, PI_A4, PI_1_8
+, PI_F4, PI_1_4, PI_D5, PI_1_4, PI_D5, PI_3_16, PI_D5, PI_3_16, PI_E5, PI_1_8, PI_D5, PI_1_8, PI_C5, PI_1_8, PI_B4, PI_1_8
+, PI_C5, PI_1_4, PI_F5, PI_3_16, PI_F5, PI_3_16, PI_F5, PI_1_8, PI_E5, PI_1_8, PI_D5, PI_1_8, PI_C5, PI_1_8, PI_B4, PI_1_4
+, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_G4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_1_8, PI_G4, PI_1_8, PI_F4, PI_1_4, PI_B4, PI_3_16
+, PI_C5, PI_3_16, PI_D5, PI_1_4, PI_C5, PI_1_8, PI_B4, PI_1_8, PI_G4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_1_8, PI_G4, PI_1_8
+, PI_F4, PI_3_16, PI_G4, PI_3_16, PI_F4, PI_1_8, PI_D4, PI_1_8, PI_F4, PI_1_4, PI_B4, PI_3_16, PI_C5, PI_3_16, PI_B4, PI_1_4
+};
+
+#define MUSIC_HAIL_TO_THE_CHIEF_SIZE  208
+#define MUSIC_HAIL_TO_THE_CHIEF_NOTES 104
+
+uint8_t PROGMEM MUSIC_HAIL_TO_THE_CHIEF2[] = {
+  PI_A4, PI_1_4, PI_B4, PI_3_16, PI_C5, PI_3_16, PI_D5, PI_1_4, PI_C5, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_3_16
+, PI_A4, PI_3_16, PI_F4, PI_3_16, PI_E4, PI_1_4, PI_D4, PI_1_4, PI_A4, PI_1_4, PI_D5, PI_3_16, PI_E5, PI_3_16, PI_F5, PI_1_4
+, PI_E5, PI_3_16, PI_D5, PI_3_16, PI_E5, PI_3_16, PI_D5, PI_3_16, PI_E5, PI_3_16, PI_F5, PI_3_16, PI_E5, PI_1_8, PI_D5, PI_1_8
+, PI_C5, PI_1_8, PI_B4, PI_1_8, PI_A4, PI_1_4, PI_B4, PI_3_16, PI_C5, PI_3_16, PI_D5, PI_1_4, PI_C5, PI_3_16, PI_B4, PI_3_16
+, PI_A4, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_F4, PI_3_16, PI_E4, PI_1_4, PI_D4, PI_1_4, PI_A4, PI_1_4, PI_D5, PI_3_16
+, PI_C5, PI_3_16, PI_B4, PI_3_16, PI_D5, PI_3_16, PI_A4, PI_3_16, PI_F4, PI_3_16, PI_A4, PI_1_4, PI_D5, PI_3_16, PI_E5, PI_3_16
+, PI_D5, PI_1_4, PI_REST, PI_1_4, PI_F5, PI_1_4, PI_F5, PI_3_16, PI_F5, PI_3_16, PI_F5, PI_1_4, PI_G5, PI_3_16, PI_F5, PI_3_16
+, PI_E5, PI_3_16, PI_D5, PI_3_16, PI_E5, PI_1_8, PI_F5, PI_1_8, PI_E5, PI_1_4, PI_A4, PI_1_4, PI_F5, PI_1_4, PI_F5, PI_3_16
+, PI_F5, PI_3_16, PI_F5, PI_1_4, PI_E5, PI_3_16, PI_D5, PI_3_16, PI_E5, PI_1_4, PI_A5, PI_3_16, PI_A5, PI_3_16, PI_A5, PI_3_16
+, PI_G5, PI_3_16, PI_F5, PI_3_16, PI_E5, PI_3_16, PI_D5, PI_1_4, PI_D5, PI_3_16, PI_C5, PI_3_16, PI_B4, PI_3_16, PI_C5, PI_3_16
+, PI_D5, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_1_4, PI_D5, PI_3_16, PI_E5, PI_3_16, PI_F5, PI_1_4, PI_D5, PI_1_4, PI_B4, PI_1_4
+, PI_D5, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_1_8, PI_F4, PI_1_8, PI_A4, PI_1_4, PI_D5, PI_3_16
+, PI_E5, PI_3_16, PI_D5, PI_1_4, PI_REST, PI_1_4, PI_D4, PI_1_4, PI_D5, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_F4, PI_3_16
+, PI_D4, PI_1_4, PI_E4, PI_1_4, PI_E5, PI_3_16, PI_F5, PI_3_16, PI_E5, PI_3_16, PI_D4, PI_3_16, PI_E4, PI_1_4, PI_F4, PI_1_8
+, PI_A4, PI_1_8, PI_D5, PI_1_8, PI_E5, PI_1_8, PI_F5, PI_1_4, PI_E5, PI_1_8, PI_D5, PI_1_8, PI_B4, PI_1_16, PI_D5, PI_3_16
+, PI_A4, PI_1_8, PI_F4, PI_1_8, PI_E4, PI_1_2, PI_D4, PI_1_4, PI_D5, PI_3_16, PI_B4, PI_3_16, PI_A4, PI_3_16, PI_F4, PI_3_16
+, PI_D4, PI_1_4, PI_E4, PI_3_16, PI_E5, PI_3_16, PI_E5, PI_3_16, PI_F5, PI_3_16, PI_E5, PI_3_16, PI_D5, PI_3_16, PI_B4, PI_1_4
+, PI_A4, PI_3_16, PI_A4, PI_3_16, PI_D5, PI_1_8, PI_C5, PI_1_8, PI_A4, PI_1_8, PI_F4, PI_1_8, PI_A4, PI_1_8, PI_B4, PI_1_8
+, PI_A4, PI_1_4, PI_D5, PI_3_16, PI_D5, PI_3_16, PI_D5, PI_1_4, PI_REST, PI_1_4};
+
+#define MUSIC_HAIL_TO_THE_CHIEF2_SIZE 298
+#define MUSIC_HAIL_TO_THE_CHIEF2_NOTES 149
+
+
+#define PI_ANALOG_OUT(PORT, VALUE)     analogWrite(PORT, VALUE)
+#define PI_DIGITAL_OUT(PORT, VALUE)    digitalWrite(PORT, VALUE)
+
+int       pi_note_phase    = 500;
+int16_t   pi_note_playing  = 0;
+int16_t   pi_note_period   = 100;
+uint32_t  pi_note_start    = 0;
+uint32_t  pi_note_duration = 0;
+uint16_t  pi_music_size    = 0;
+uint8_t * pi_music_data    = NULL;
+uint32_t  pi_note_vibe     = 0;
+
+unsigned long pi_music_timer = 0;
+
+void pi_music_init(uint8_t * music_data, uint16_t music_size) {
+  PI_ANALOG_OUT(PI_PIEZO_PIN, 0);
+  pi_note_playing  = 0;
+  pi_note_duration = 0;
+  pi_note_phase    = 0;
+  pi_note_period   = 0;
+  
+  pi_music_data    = music_data; 
+  pi_music_size    = music_size;
+  pi_note_start    = micros();
+  Timer1.initialize();
+  Timer1.disablePwm(9);
+}
+
+
+#define PI_NOTE_DURATION 30000
+
+void pi_music_update() {
+  uint32_t now    = micros();
+  uint32_t delta  = now - pi_note_start;
+  /*
+  Serial.print("Delta: ");
+  Serial.print(delta, DEC);   
+  Serial.println("");
+  Serial.print("Duration: ");
+  Serial.print(pi_note_, DEC);   
+  Serial.println("");
+*/
+
+  // Note has been playing long enough, play new note
+  if (delta >= pi_note_duration ) {
+    uint8_t note     = pgm_read_byte(pi_music_data + pi_note_playing); 
+    uint8_t dura     = pgm_read_byte(pi_music_data + pi_note_playing + 1); 
+    pi_note_duration = ((uint32_t)dura) * PI_NOTE_DURATION;
+    pi_note_period   = (note ? pgm_read_word(PI_NOTE_PERIOD + note) : 0); 
+    Serial.print("Note: ");
+    Serial.print(note, DEC);
+    Serial.println("");
+    Serial.print("Period: ");
+    Serial.print(pi_note_period, DEC);
+    Serial.println("");
+    Serial.print("Dura: ");
+    Serial.print(dura, DEC);
+    Serial.println("");
+    Serial.print("Dura2: ");
+    Serial.print(pi_note_duration, DEC);
+    Serial.println("");
+    // On to next note. 
+    pi_note_playing += 2;
+    // Roll back to start of song if done.
+    if (pi_note_playing >= pi_music_size) {
+      pi_note_playing = 0;  
+    }
+    PI_ANALOG_OUT(PI_PIEZO_PIN, 0); // start with a rest
+    pi_note_phase = 0;
+    pi_note_vibe  = 0;
+    pi_note_start = now; // and be sure to update note start time! 
+    // set to use PWM 
+    if(pi_note_period) {  
+      Timer1.pwm(9, 100, pi_note_period * 2);
+    } else {  
+      Timer1.disablePwm(9);
+    }  
+  }
+  
+  // pi_note_period = 1000;
+  
+  // no period means rest
+/*  if (!pi_note_period) {
+    return;
+  }  
+  */
+  /*
+  delayMicroseconds(pi_note_period);
+  PI_ANALOG_OUT(PI_PIEZO_PIN, 500);    
+  delayMicroseconds(pi_note_period);
+  PI_ANALOG_OUT(PI_PIEZO_PIN, 0);
+  *//*
+  if(pi_note_vibe >= pi_note_period) {
+    pi_note_phase = ( pi_note_phase > 0 ? 0 : 500);    
+    PI_ANALOG_OUT(PI_PIEZO_PIN, pi_note_phase);
+    pi_note_vibe  = 0;
+  }  
+  pi_note_vibe ++;  
+  */
+  /*
+  // now bit bang 
+  if((now % ((uint32_t)pi_note_period)) == 0) {
+    // toggle on and off every period ticks. 
+    pi_note_phase = ( pi_note_phase > 0 ? 0 : 128);    
+    PI_ANALOG_OUT(PI_PIEZO_PIN, pi_note_phase);
+  }*/
+  return;
+}
+
+
+
+
+
+
+void setup(void) {
+  // pinMode(ledPin, OUTPUT);  
+  pi_music_init(MUSIC_HAIL_TO_THE_CHIEF2, MUSIC_HAIL_TO_THE_CHIEF2_SIZE);
+  Serial.begin(9600);  
+  Serial.println("Start!");
   nokia.init();
+  
   // you can change the contrast around to adapt the display
   // for the best viewing!
   // nokia.setContrast(60);
@@ -112,6 +457,7 @@ void setup(void) {
   nokia.display();
   delay(2000);
   nokia.clear();
+  
   
   // draw multiple rectangles
   testfillrect();
@@ -182,7 +528,9 @@ void draw_obama(void) {
   nokia.display();
 }
 
-void loop(void) {}
+void loop(void) {
+  pi_music_update();  
+}
 
 #define NUMFLAKES 8
 #define XPOS 0
