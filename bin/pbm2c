@@ -14,12 +14,12 @@ bits  = lines[3..(lines.size)].join('')
 bytes = wide * high / 8 # XXX: image height or width must be multiples of 8
 cname = fin.split('.').first.upcase
 
-puts "#define IMAGE_#{cname}_HIGH #{high}"
-puts "#define IMAGE_#{cname}_WIDE #{wide}"
-
+puts "#define #{cname}_HIGH #{high}"
+puts "#define #{cname}_WIDE #{wide}"
+#define O_IMAGE_W 48
 nl_after = 6
 first    = true
-puts "static unsigned char __attribute__ ((progmem)) IMAGE_#{cname}_BMP[] = {"
+puts "static unsigned char __attribute__ ((progmem)) #{cname}_BMP[] = {"
 (0...bytes).each do |index|
   printf "\n" if ((index % nl_after) == 0)
   if first
@@ -29,7 +29,7 @@ puts "static unsigned char __attribute__ ((progmem)) IMAGE_#{cname}_BMP[] = {"
   end
   start = index * 8
   part  = bits[start, 8]
-  printf "0xb#{part}"
+  printf "0b#{part}"
 end
 puts "\n};"
 
