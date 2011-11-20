@@ -656,7 +656,7 @@ void draw_obama(void) {
   #endif
   #ifdef DYMO
   nokia.setCursor(0, 34);
-  nokia.println("Bjorn De Meyer");
+  nokia.println("BDM 0528");
   #else
   nokia.setCursor(48, 10);
   nokia.println("Obama!");
