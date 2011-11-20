@@ -7,12 +7,14 @@
 #define DYMO
 
 
-// pin 7 - Serial clock out (SCLK)
-// pin 6 - Serial data out (DIN)
-// pin 5 - Data/Command select (D/C)
-// pin 4 - LCD chip select (CS)
-// pin 3 - LCD reset (RST)
-PCD8544 nokia = PCD8544(7, 6, 5, 4, 3);
+// pin 7 - Serial clock out (SCLK) real pin: 13  violet
+// pin 7 is in use for programmer, use pin 12 real pin 18 
+// pin 6 - Serial data out (DIN) real pin:  12 blue 
+// pin 5 - Data/Command select (D/C) 11 green
+// pin 4 - LCD chip select (CS) 
+// Pin 4 is in use by usb, use pin 8 in stead real pin 14 yellow
+// pin 3 - LCD reset (RST) real pin 5 orange
+PCD8544 nokia = PCD8544(12, 6, 5, 8, 3);
 
 // a bitmap of a 16x16 fruit icon
 static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
@@ -471,6 +473,7 @@ void pi_music_update() {
     uint8_t dura     = pgm_read_byte(pi_music_data + pi_note_playing + 1); 
     pi_note_duration = ((uint32_t)dura) * PI_NOTE_DURATION;
     pi_note_period   = (note ? pgm_read_word(PI_NOTE_PERIOD + note) : 0); 
+    /*
     Serial.print("Note: ");
     Serial.print(note, DEC);
     Serial.println("");
@@ -483,6 +486,7 @@ void pi_music_update() {
     Serial.print("Dura2: ");
     Serial.print(pi_note_duration, DEC);
     Serial.println("");
+    */
     // On to next note. 
     pi_note_playing += 2;
     // Roll back to start of song if done.
@@ -539,13 +543,13 @@ void pi_music_update() {
 void setup(void) {
   // pinMode(ledPin, OUTPUT);  
   pi_music_init(MUSIC_HAIL_TO_THE_CHIEF3, MUSIC_HAIL_TO_THE_CHIEF3_SIZE);
-  Serial.begin(9600);  
-  Serial.println("Start!");
+//  Serial.begin(9600);  
+//  Serial.println("Start!");
   nokia.init();
   
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  // nokia.setContrast(60);
+  nokia.setContrast(35);
   // turn all the pixels on (a handy test)
   //nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
   //delay(500);
@@ -553,7 +557,7 @@ void setup(void) {
   //nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 
   // show splashscreen
-  nokia.display();
+  // nokia.display();
   /*
   //delay(2000);
   nokia.clear();
@@ -612,10 +616,10 @@ void setup(void) {
   */
   // draw a bitmap icon and 'animate' movement
   // testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
-  Serial.println("Drawing!");
+//  Serial.println("Drawing!");
   draw_obama();
 
-  Serial.println("Draw ok!");
+//  Serial.println("Draw ok!");
 }
 
 void my_drawbitmap(uint8_t x, uint8_t y, 
@@ -651,8 +655,8 @@ void draw_obama(void) {
   my_drawbitmap(0, 0, IMAGE_OBAMA_BMP, IMAGE_OBAMA_WIDE, IMAGE_OBAMA_HIGH, BLACK);
   #endif
   #ifdef DYMO
-  nokia.setCursor(48, 34);
-  nokia.println("BDM!");
+  nokia.setCursor(0, 34);
+  nokia.println("Bjorn De Meyer");
   #else
   nokia.setCursor(48, 10);
   nokia.println("Obama!");
@@ -661,7 +665,7 @@ void draw_obama(void) {
 }
 
 void loop(void) {
-  pi_music_update();  
+  // pi_music_update();  
 }
 
 #define NUMFLAKES 8
