@@ -549,12 +549,12 @@ void setup(void) {
   
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  nokia.setContrast(35);
+  nokia.setContrast(50);
   // turn all the pixels on (a handy test)
-  //nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
-  //delay(500);
+  nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
+  delay(500);
   // back to normal
-  //nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+  nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 
   // show splashscreen
   // nokia.display();
@@ -665,7 +665,7 @@ void draw_obama(void) {
 }
 
 void loop(void) {
-  // pi_music_update();  
+  pi_music_update();  
 }
 
 #define NUMFLAKES 8
