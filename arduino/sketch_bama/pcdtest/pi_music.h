@@ -1,9 +1,11 @@
 #ifndef PI_MUSIC_H
 #define PI_MUSIC_H
 
+#include "pi.h"
+
 #ifndef PI_PROGMEM
 #define PI_PROGMEM __attribute__((progmem))
-#endif PI_PROGMEM
+#endif
 
 #define PI_LED_PIN       13
 #define PI_SOUND_PIN     9 
@@ -164,19 +166,18 @@
 
 
 /** Prepares the given music buffer with the given size for playing. */
-void pi_music_init(uint8_t * music_data, uint16_t music_size);
-
+extern void pi_music_init(uint8_t * music_data, uint16_t music_size);
 
 /** Turns of the currently playing sound. */
-void pi_sound_off();
+extern void pi_sound_off();
 
 /** Starts playing the sound with the given period * 2^16 (2^16/frequency). 
 * This will keep playing until pi_sound_off() is called. 
 */
-void pi_sound_on(long period);
+extern void pi_sound_on(long period);
 
 /** Call this in the main loop to update the music that is being played.*/
-void pi_music_update();
+extern void pi_music_update();
 
 #endif
 

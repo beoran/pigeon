@@ -1,9 +1,5 @@
 #include "pi_music.h"
 
-#include "TimerOne.h"
-#include <avr/pgmspace.h>
-#include <util/delay.h>
-#include <stdlib.h>
 
 /** Period of the notes, starting from C0, including half notes like C#0, etc.  */
 static uint16_t PI_PROGMEM PI_NOTE_PERIOD[] = {
@@ -19,6 +15,14 @@ static uint16_t PI_PROGMEM PI_NOTE_PERIOD[] = {
 };
 
 
+  
+/* This is a father Jacob tune for testing: 
+ ,PI_C, PI_1_4, PI_D, PI_1_4, PI_E, PI_1_4, PI_C, PI_1_4
+ ,PI_C, PI_1_4, PI_D, PI_1_4, PI_E, PI_1_4, PI_C, PI_1_4
+ ,PI_E, PI_1_4, PI_F, PI_1_4, PI_G, PI_1_4, PI_R, PI_1_4
+ ,PI_E, PI_1_4, PI_F, PI_1_4, PI_G, PI_1_4, PI_R, PI_1_4
+ ,PI_R, PI_2_1 
+ */
 
 #define PI_ANALOG_OUT(PORT, VALUE)     analogWrite(PORT, VALUE)
 #define PI_DIGITAL_OUT(PORT, VALUE)    digitalWrite(PORT, VALUE)

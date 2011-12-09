@@ -1,6 +1,7 @@
 #include "PCD8544.h"
 #include "TimerOne.h"
 #include "pi_music.h"
+#include "pi_lcd.h"
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdlib.h>
@@ -24,7 +25,7 @@
 #define LCD_CS_PIN      8
 #define LCD_RST_PIN     3
 
-PCD8544 lcd = PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
+// PCD8544 lcd = PCD8544(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
 
 // a bitmap of a 16x16 fruit icon
 static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
@@ -90,71 +91,6 @@ static unsigned char __attribute__ ((progmem)) IMAGE_OBAMA_BMP[] = {
 , 0b11111111, 0b11111100, 0b00010010, 0b00000001, 0b11111111, 0b11111111
 };
 
-#ifdef DYMO
-
-#define IMAGE_DYMO_HIGH 32
-#define IMAGE_DYMO_WIDE 80
-
-static unsigned char __attribute__ ((progmem)) IMAGE_DYMO_BMP[] = {
-  0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00111000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01000100
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b10110010, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000001, 0b00101001, 0b00000111, 0b11111100, 0b00011111, 0b00000111
-, 0b11011111, 0b11000011, 0b11111000, 0b00011111, 0b11000001, 0b00110001
-, 0b00001111, 0b11111111, 0b00001111, 0b10001111, 0b10011111, 0b11000111
-, 0b11111000, 0b11111111, 0b11111001, 0b00101001, 0b00001111, 0b11111111
-, 0b11000111, 0b10011111, 0b00111111, 0b11000111, 0b11110001, 0b11111000
-, 0b01111100, 0b10000010, 0b00001111, 0b00000011, 0b11100111, 0b11011110
-, 0b00111111, 0b11101111, 0b11110011, 0b11110000, 0b00111110, 0b01000100
-, 0b00011110, 0b00000001, 0b11100011, 0b11011100, 0b00111111, 0b11111111
-, 0b11110111, 0b11100000, 0b00111110, 0b00111000, 0b00011110, 0b00000001
-, 0b11100011, 0b11101000, 0b00111111, 0b11111111, 0b11110111, 0b11000000
-, 0b00111110, 0b00000000, 0b00011110, 0b00000011, 0b11100001, 0b11100000
-, 0b01111111, 0b11111111, 0b11100111, 0b11000000, 0b00111110, 0b00000000
-, 0b00111100, 0b00000111, 0b11000001, 0b11100000, 0b01111101, 0b11111101
-, 0b11100111, 0b11000000, 0b01111100, 0b00000000, 0b00111111, 0b11111111
-, 0b10000011, 0b11100000, 0b01111001, 0b11111001, 0b11100011, 0b11100001
-, 0b11111000, 0b00000000, 0b01111111, 0b11111111, 0b00000011, 0b11100000
-, 0b11111001, 0b11111011, 0b11000001, 0b11111111, 0b11110000, 0b00000000
-, 0b01111111, 0b11111100, 0b00000111, 0b11000000, 0b11110001, 0b11110011
-, 0b11000000, 0b01111111, 0b11000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000
-};
-
-#endif
-
-
 
 /*
 X: 1
@@ -208,14 +144,7 @@ uint8_t PROGMEM MUSIC_HAIL_TO_THE_CHIEF3[] = {
 , PI_D4, PI_1_8, PI_D5, PI_1_8, PI_D5, PI_1_8, PI_E5, PI_1_8, PI_D5, PI_3_16, PI_C5, PI_1_16, PI_A4, PI_1_4
 , PI_G4, PI_1_4, PI_C5, PI_1_8, PI_B4, PI_1_8, PI_A4, PI_1_8, PI_C5, PI_1_8, PI_G4, PI_1_8, PI_E4, PI_1_8
 , PI_C5, PI_1_4, PI_C5, PI_3_16, PI_C5, PI_1_16, PI_C5, PI_1_4, PI_REST, PI_1_4
-  
-/* This is a father Jacob tune for testing: 
- ,PI_C, PI_1_4, PI_D, PI_1_4, PI_E, PI_1_4, PI_C, PI_1_4
- ,PI_C, PI_1_4, PI_D, PI_1_4, PI_E, PI_1_4, PI_C, PI_1_4
- ,PI_E, PI_1_4, PI_F, PI_1_4, PI_G, PI_1_4, PI_R, PI_1_4
- ,PI_E, PI_1_4, PI_F, PI_1_4, PI_G, PI_1_4, PI_R, PI_1_4
- ,PI_R, PI_2_1 
- */
+
 };
   
 #define MUSIC_HAIL_TO_THE_CHIEF3_SIZE (sizeof(MUSIC_HAIL_TO_THE_CHIEF3))
@@ -315,18 +244,27 @@ void setup(void) {
   // pinMode(ledPin, OUTPUT);  
   pi_music_init(MUSIC_HAIL_TO_THE_CHIEF3, MUSIC_HAIL_TO_THE_CHIEF3_SIZE);
   pi_key_init();
+
+
 //  Serial.begin(9600);  
 //  Serial.println("Start!");
-  lcd.init();
+  // lcd.init();
+  pi_lcd_open(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
+  pi_lcd_init(50);
+  // Clear the display. 
+  pi_lcd_clear();
   
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  lcd.setContrast(50);
+  // pi_lcd_contrast(50);
+  // lcd.setContrast(50);
   // turn all the pixels on (a handy test)
-  lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
+  // lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
+  pi_lcd_allon();
   delay(500);
-  // back to normal
-  lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+  pi_lcd_normal();
+  //  back to normal
+  // lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 
   // show splashscreen
   // lcd.display();
@@ -388,6 +326,11 @@ void setup(void) {
   */
   // draw a bitmap icon and 'animate' movement
   // testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
+  pi_lcd_setone(0, 0, 0xff);
+  pi_lcd_setone(2, 2, 0xff); 
+  pi_lcd_setone(4, 4, 0xff);
+  pi_lcd_flush();
+  // pi_lcd_setone(6, 6, 0xff);
 //  Serial.println("Drawing!");
   draw_obama();
 
@@ -405,7 +348,7 @@ void my_drawbitmap(uint8_t x, uint8_t y,
       uint16_t dif = yy*(w/8) + (xx/8);
       uint8_t   by = pgm_read_byte(bitmap + dif); 
       if (by & (1 << (7 - (xx%8)))) {
-	lcd.setPixel(x+xx, y+yy, color);
+	//lcd.setPixel(x+xx, y+yy, color);
       } /*else {
         lcd.setPixel(x+xx, y+yy, WHITE);
       }*/
@@ -414,6 +357,7 @@ void my_drawbitmap(uint8_t x, uint8_t y,
 }
 
 void draw_obama(void) {
+  /*
   lcd.clear();
   #ifdef DYMO
   for(int i = -32 ; i < 1; i ++) {  
@@ -434,6 +378,7 @@ void draw_obama(void) {
   lcd.println("Obama!");
   #endif
   lcd.display();
+  */
 }
 
 void check_key(int res, char * buf, int index, char chon, int choff) {
@@ -447,7 +392,7 @@ void check_key(int res, char * buf, int index, char chon, int choff) {
 void loop(void) {
   pi_music_update();  
   char buf[9] = "        ";   
-  lcd.setCursor(0, 34);
+  /* lcd.setCursor(0, 34); */
   check_key(pi_key_left() , buf, 0, 'L', 'l');
   check_key(pi_key_down() , buf, 1, 'D', 'd');
   check_key(pi_key_right(), buf, 2, 'R', 'r');
@@ -456,94 +401,11 @@ void loop(void) {
   check_key(pi_key_b()    , buf, 5, 'B', 'b');
   check_key(pi_key_x()    , buf, 6, 'X', 'x');
   check_key(pi_key_y()    , buf, 7, 'Y', 'y');
+  /*
   lcd.println(buf);        
   lcd.display();
-}
-
-#define NUMFLAKES 8
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
-
-void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
-  uint8_t icons[NUMFLAKES][3];
-  srandom(666);     // whatever seed
- 
-  // initialize
-  for (uint8_t f=0; f< NUMFLAKES; f++) {
-    icons[f][XPOS] = random() % LCDWIDTH;
-    icons[f][YPOS] = 0;
-    icons[f][DELTAY] = random() % 5 + 1;
-  }
-
-  while (1) {
-    // draw each icon
-    for (uint8_t f=0; f< NUMFLAKES; f++) {
-      lcd.drawbitmap(icons[f][XPOS], icons[f][YPOS], logo16_glcd_bmp, w, h, BLACK);
-    }
-    lcd.display();
-    delay(200);
-    
-    // then erase it + move it
-    for (uint8_t f=0; f< NUMFLAKES; f++) {
-      lcd.drawbitmap(icons[f][XPOS], icons[f][YPOS],  logo16_glcd_bmp, w, h, 0);
-      // move it
-      icons[f][YPOS] += icons[f][DELTAY];
-      // if its gone, reinit
-      if (icons[f][YPOS] > LCDHEIGHT) {
-	icons[f][XPOS] = random() % LCDWIDTH;
-	icons[f][YPOS] = 0;
-	icons[f][DELTAY] = random() % 5 + 1;
-      }
-    }
-  }
-}
-
-void testdrawchar(void) {
-  for (uint8_t i=0; i < 64; i++) {
-    lcd.drawchar((i % 14) * 6, (i/14) * 8, i);
-  }    
-  lcd.display();
-  delay(2000);
-  for (uint8_t i=0; i < 64; i++) {
-    lcd.drawchar((i % 14) * 6, (i/14) * 8, i + 64);
-  }    
-}
-
-void testdrawcircle(void) {
-  for (uint8_t i=0; i<48; i+=2) {
-    lcd.drawcircle(41, 23, i, BLACK);
-  }
+  */
 }
 
 
-void testdrawrect(void) {
-  for (uint8_t i=0; i<48; i+=2) {
-    lcd.drawrect(i, i, 96-i, 48-i, BLACK);
-  }
-}
 
-void testfillrect(void) {
-  for (uint8_t i=0; i<48; i++) {
-      // alternate colors for moire effect
-    lcd.fillrect(i, i, 84-i, 48-i, i%2);
-  }
-}
-
-void testdrawline() {
-  for (uint8_t i=0; i<84; i+=4) {
-    lcd.drawline(0, 0, i, 47, BLACK);
-  }
-  for (uint8_t i=0; i<48; i+=4) {
-    lcd.drawline(0, 0, 83, i, BLACK);
-  }
-
-  lcd.display();
-  delay(1000);
-  for (uint8_t i=0; i<84; i+=4) {
-    lcd.drawline(i, 47, 0, 0, WHITE);
-  }
-  for (uint8_t i=0; i<48; i+=4) {
-    lcd.drawline(83, i, 0, 0, WHITE);
-  }
-}
