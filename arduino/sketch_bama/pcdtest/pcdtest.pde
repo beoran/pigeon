@@ -250,7 +250,7 @@ void setup(void) {
 //  Serial.println("Start!");
   // lcd.init();
   pi_lcd_open(LCD_SCLK_PIN, LCD_DIN_PIN, LCD_DC_PIN, LCD_CS_PIN, LCD_RST_PIN);
-  pi_lcd_init(50);
+  pi_lcd_init(35);
   // Clear the display. 
   pi_lcd_clear();
   

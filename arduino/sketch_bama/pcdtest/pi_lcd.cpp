@@ -119,6 +119,14 @@ void pi_lcd_flush(void) {
   pi_lcd_command(PI_LCD_SETYADDR );  
 }    
 
+static unsigned char pi_font[] PROGMEM = {
+  0b00000000,
+  0b00111110,
+  0b01001000,
+  0b10001000,
+  0b00101000,
+  0b00011110,
+};  
 
 
 
