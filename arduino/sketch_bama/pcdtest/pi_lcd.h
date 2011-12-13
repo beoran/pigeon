@@ -31,6 +31,11 @@ and it was widely used in Nokia phones. */
 #define PI_LCD_SETBIAS 0x10
 #define PI_LCD_SETVOP  0x80
 
+#define PI_FONT_HIGH 8
+#define PI_FONT_WIDE 6
+
+extern unsigned char __attribute__ ((progmem)) PI_FONT_BMP[];
+
 
 void pi_lcd_open(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst);
 void pi_lcd_init(uint8_t contrast);
@@ -44,8 +49,11 @@ void pi_lcd_setrev(uint8_t x, uint8_t y, uint8_t pixels);
 void pi_lcd_allon(void); 
 void pi_lcd_normal(void);
 void pi_lcd_flush(void);
+void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h, uint8_t color);
 
-
+void pi_lcd_putc(uint8_t x, uint8_t y, char c);
+void pi_lcd_puts(uint8_t x, uint8_t y, char * c);
+void pi_lcd_puts_p(uint8_t x, uint8_t y, char * c);
 
 
 

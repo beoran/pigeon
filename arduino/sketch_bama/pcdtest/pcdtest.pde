@@ -1,4 +1,3 @@
-#include "PCD8544.h"
 #include "TimerOne.h"
 #include "pi.h"
 #include "pi_music.h"
@@ -393,21 +392,11 @@ void setup(void) {
 //  Serial.println("Draw ok!");
 }
 
-void my_drawbitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, 
-                   uint8_t w, uint8_t h, uint8_t color)
-{
-  for (uint8_t xx=0; xx < w; xx++ ) {  
-    for (uint8_t yy=0; yy < (h/8); yy++) {
-      uint16_t dif = yy + (xx*(h/8));
-      uint8_t  byt = pgm_read_byte(bitmap + dif); 
-      pi_lcd_setone(xx + x, yy, byt);
-    }
-  }
-  pi_lcd_flush();
-}
 
 void draw_obama(void) {
-  my_drawbitmap(10, 0, IMAGE_OBAMA_BMP, IMAGE_OBAMA_WIDE, IMAGE_OBAMA_HIGH, BLACK);
+  pi_lcd_rawblit_p(10, 0, IMAGE_OBAMA_BMP, IMAGE_OBAMA_WIDE, IMAGE_OBAMA_HIGH, BLACK);
+  pi_lcd_puts(0, 0, "Hello!");
+  pi_lcd_putc(0, 0, '!');
   
   /*
   lcd.clear();

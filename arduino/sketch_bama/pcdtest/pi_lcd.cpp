@@ -126,14 +126,43 @@ void pi_lcd_flush(void) {
   pi_lcd_command(PI_LCD_SETYADDR );  
 }    
 
-static unsigned char pi_font[] PROGMEM = {
-  0b00000000,
-  0b00111110,
-  0b01001000,
-  0b10001000,
-  0b00101000,
-  0b00011110,
-};  
+
+
+/** Draws a bitmap (from program memory) in a primitive sort of way. */
+void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h, uint8_t color) {
+  for (uint8_t xx=0; xx < w; xx++ ) {  
+    for (uint8_t yy=0; yy < (h/8); yy++) {
+      uint16_t dif = yy + (xx*(h/8));
+      uint8_t  byt = pgm_read_byte(bitmap + dif); 
+      pi_lcd_setone(xx + x, yy, byt);
+    }
+  }
+  pi_lcd_flush();
+}
+
+
+void pi_lcd_putc(uint8_t x, uint8_t y, char c) {
+  // draw nothing if not available.
+  if ((c < 33) || (c > 126)) { return; }
+  uint8_t * bitmap = PI_FONT_BMP + (c * PI_FONT_WIDE) - 33;
+  pi_lcd_rawblit_p(x, y, bitmap, PI_FONT_WIDE, PI_FONT_HIGH, BLACK);  
+}
+
+void pi_lcd_puts(uint8_t x, uint8_t y, char * c) {
+  for(; *c != '\0'; c++) {
+    pi_lcd_putc(x, y, *c);
+    x += PI_FONT_WIDE;
+  }
+}
+
+void pi_lcd_puts_p(uint8_t x, uint8_t y, char * c) {
+  char b = 1;
+  for(; b != '\0'; c++, b = pgm_read_byte(c) ) {
+    char b = pgm_read_byte(c); 
+    pi_lcd_putc(x, y, b);
+    x += PI_FONT_WIDE;
+  }
+}
 
 
 
