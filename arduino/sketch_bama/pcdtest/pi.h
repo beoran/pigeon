@@ -14,6 +14,8 @@
   #include "WProgram.h"
 #endif
 
+#define PI_PROGMEM __attribute__((progmem))
+
 
 #endif
 

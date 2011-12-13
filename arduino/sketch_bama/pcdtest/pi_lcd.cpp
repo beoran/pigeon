@@ -16,8 +16,12 @@ void pi_lcd_open(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst) {
   textcolor = BLACK;
 }
 
-static inline void pi_lcd_out(uint8_t c) {
+static void pi_lcd_out(uint8_t c) {
   shiftOut(din_, sclk_, MSBFIRST, c);
+}
+
+static void pi_lcd_outrev(uint8_t c) {
+  shiftOut(din_, sclk_, LSBFIRST, c);
 }
 
 void pi_lcd_command(uint8_t c) {
@@ -27,8 +31,11 @@ void pi_lcd_command(uint8_t c) {
 
 void pi_lcd_data(uint8_t c) {
   digitalWrite(dc_, HIGH);
-  pi_lcd_out(c);
+  // reverse byte order for output since that maskes the use of 0bxxxxxxxx constants easier.
+  pi_lcd_outrev(c);
 }
+
+
 
 // Get into the EXTENDED mode!
 void pi_lcd_extended_mode(void) {

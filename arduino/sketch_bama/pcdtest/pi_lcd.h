@@ -40,6 +40,7 @@ void pi_lcd_data(uint8_t data);
 void pi_lcd_clear(void);
 void pi_lcd_display(void);
 void pi_lcd_setone(uint8_t x, uint8_t y, uint8_t pixels);
+void pi_lcd_setrev(uint8_t x, uint8_t y, uint8_t pixels);
 void pi_lcd_allon(void); 
 void pi_lcd_normal(void);
 void pi_lcd_flush(void);
