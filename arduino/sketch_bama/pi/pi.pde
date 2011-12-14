@@ -233,7 +233,7 @@ void setup(void) {
   
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  // pi_lcd_contrast(50);
+  pi_lcd_contrast_(40);
   // lcd.setContrast(50);
   // turn all the pixels on (a handy test)
   // lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
@@ -352,6 +352,9 @@ void check_key(int res, char * buf, int index, char chon, int choff) {
   }  
 }
 
+char player_x = 0;
+char player_y = 0;
+
 void loop(void) {
   pi_music_update();  
   char buf[9] = "        ";   
@@ -365,8 +368,15 @@ void loop(void) {
   check_key(pi_key_x()    , buf, 6, 'X', 'x');
   check_key(pi_key_y()    , buf, 7, 'Y', 'y');
   pi_lcd_puts(12, 26, buf);
-  if(pi_key_y()) { pi_lcd_invert();  }  
-  if(pi_key_x()) { pi_lcd_normal();  }  
+  if(pi_key_y())     { pi_lcd_invert();  }  
+  if(pi_key_x())     { pi_lcd_normal();  }
+  if(pi_key_up())    { player_x++;       }  
+  if(pi_key_down())  { player_x--;       }
+  if(pi_key_left())  { player_y--;       }
+  if(pi_key_right()) { player_y++;       }
+  
+    
+  pi_lcd_putsprite(player_x, player_y, 0);
   /*
   lcd.println(buf);        
   lcd.display();

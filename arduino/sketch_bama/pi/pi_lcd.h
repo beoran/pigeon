@@ -39,7 +39,7 @@ extern unsigned char __attribute__ ((progmem)) PI_FONT_BMP[];
 
 void pi_lcd_open(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst);
 void pi_lcd_init(uint8_t contrast);
-void pi_lcd_contrast(uint8_t contrast);
+void pi_lcd_contrast_(uint8_t contrast);
 void pi_lcd_command(uint8_t command);
 void pi_lcd_data(uint8_t data);
 void pi_lcd_clear(void);
@@ -56,6 +56,7 @@ void pi_lcd_putc(uint8_t x, uint8_t y, char c);
 void pi_lcd_puts(uint8_t x, uint8_t y, char * c);
 void pi_lcd_puts_p(uint8_t x, uint8_t y, char * c);
 
+void pi_lcd_putsprite(uint8_t x, uint8_t y, uint8_t index);
 
 
 
