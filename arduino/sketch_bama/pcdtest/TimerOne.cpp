@@ -39,12 +39,12 @@
 #include "TimerOne.h"
 
 TimerOne Timer1;              // preinstatiate
-
+/*
 ISR(TIMER1_OVF_vect)          // interrupt service routine that wraps a user defined function supplied by attachInterrupt
 {
   Timer1.isrCallback();
 }
-
+*/
 
 void TimerOne::initialize(long microseconds)
 {

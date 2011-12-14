@@ -72,15 +72,8 @@ void pi_lcd_init(uint8_t contrast) {
   digitalWrite(rst_, HIGH);
   pi_lcd_contrast_(contrast);
   
-  // Set display to Normal
+  // Set display to normal mode.
   pi_lcd_normal();
-
-  // initial display line
-  // set page address
-  // set column address
-  // write display data
-  // set up a bounding box for screen updates
-  // Clear the display
 }
 
 void pi_lcd_setyaddr(uint8_t p) { 
@@ -91,11 +84,37 @@ void pi_lcd_setxaddr(uint8_t p) {
   pi_lcd_command(PI_LCD_SETXADDR | p);
 }
 
+/** This will draw one column of pixels. Because of the structure of the display, 
+* y is the the *row* coordinate, not the pixelwide Y coordinate, however,
+* X *is* the pixel coordinate.
+*/
 void pi_lcd_setone(uint8_t x, uint8_t y, uint8_t pixels) {
   pi_lcd_setyaddr(y);
   pi_lcd_setxaddr(x);
   pi_lcd_data(pixels);
 }
+
+/** This will draw one column of pixels, combining it with a preexisting column, previous.
+* In this case, y is the real Y coordinate, not the row coordinate. Pixel coorinates are emulating 
+* by shift and combine operations.
+* Returns the upper byte blitted, which may be used on a next call of this function to preserve 
+* what the first call has drawn.
+*/
+uint8_t pi_lcd_blitone(uint8_t x, uint8_t y, uint8_t pixels, uint8_t previous) {
+  register uint8_t    row     = y / 8;
+  register uint8_t    shift   = y % 8;
+  register uint16_t   realpix = pixels;  
+  if(!pixels) return pixels;
+  realpix                   <<= ( 8 - shift); // shift the pixel up as much is needed
+  realpix                    |= previous;     // shift pixel
+  register uint8_t    low     = (uint8_t)(realpix & 255); // extract bottom part
+  register uint8_t    high    = (uint8_t)(realpix >>  8); // extract top part
+  pi_lcd_setone(x, row, high); // high contains the top part of the pixel column
+  if(shift)  pi_lcd_setone(x, row + 1, low);
+  // draw bottom part only if needed  
+  return low;
+}
+
 
 void pi_lcd_invert(void) {  
   pi_lcd_command(PI_LCD_DISPLAYCONTROL | PI_LCD_DISPLAYINVERT);
@@ -134,7 +153,21 @@ void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, ui
     for (uint8_t yy=0; yy < (h/8); yy++) {
       uint16_t dif = yy + (xx*(h/8));
       uint8_t  byt = pgm_read_byte(bitmap + dif); 
-      pi_lcd_setone(xx + x, yy, byt);
+      pi_lcd_setone(xx + x, yy + (y/8), byt);
+    }
+  }
+  pi_lcd_flush();
+}
+
+/** Draws a bitmap (from program memory). */
+void pi_lcd_blit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h, uint8_t color) {
+  uint8_t rows = h/8;
+  for (uint8_t xx=0; xx < w; xx++ ) {
+    uint8_t previous = 0;  
+    for (uint8_t yy=0; yy < rows; yy++) {
+      uint16_t dif = yy + (xx*rows);
+      uint8_t  byt = pgm_read_byte(bitmap + dif); 
+      previous     = pi_lcd_blitone(xx + x, yy + y, byt, previous);
     }
   }
   pi_lcd_flush();
@@ -142,11 +175,11 @@ void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, ui
 
 
 void pi_lcd_putc(uint8_t x, uint8_t y, char c) {
-  // draw nothing if not available.
+  // Draw nothing if not available. We only see a lmited range of ASCII characters, from ! to tilde
   if ((c < 33) || (c > 126)) { return; }
-  c -= 33;
+  c -= 33; // Font begins with ! character
   uint8_t * bitmap = PI_FONT_BMP + (c * PI_FONT_WIDE);
-  pi_lcd_rawblit_p(x, y, bitmap, PI_FONT_WIDE, PI_FONT_HIGH, BLACK);  
+  pi_lcd_blit_p(x, y, bitmap, PI_FONT_WIDE, PI_FONT_HIGH, BLACK);  
 }
 
 void pi_lcd_puts(uint8_t x, uint8_t y, char * c) {

@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "TimerOne.h"
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
