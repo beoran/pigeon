@@ -986,20 +986,20 @@ void pi_lcd_open(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst) {
 }
 
 static void pi_lcd_out(uint8_t c) {
-  shiftOut(din_, sclk_, MSBFIRST, c);
+  PI_SHIFT_OUT(din_, sclk_, MSBFIRST, c);
 }
 
 static void pi_lcd_outrev(uint8_t c) {
-  shiftOut(din_, sclk_, LSBFIRST, c);
+  PI_SHIFT_OUT(din_, sclk_, LSBFIRST, c);
 }
 
 void pi_lcd_command(uint8_t c) {
-  digitalWrite(dc_, LOW);
+  PI_DIGITAL_OUT(dc_, LOW);
   pi_lcd_out(c);
 }
 
 void pi_lcd_data(uint8_t c) {
-  digitalWrite(dc_, HIGH);
+  PI_DIGITAL_OUT(dc_, HIGH);
   // reverse byte order for output since that maskes the use of 0bxxxxxxxx constants easier.
   pi_lcd_outrev(c);
 }
@@ -1028,17 +1028,17 @@ void pi_lcd_contrast_(uint8_t contrast) {
 
 void pi_lcd_init(uint8_t contrast) {
   // set pins to output mode
-  pinMode(din_, OUTPUT);
-  pinMode(sclk_, OUTPUT);
-  pinMode(dc_, OUTPUT);
-  pinMode(rst_, OUTPUT);
-  pinMode(cs_, OUTPUT);
+  PI_PIN_MODE(din_, OUTPUT);
+  PI_PIN_MODE(sclk_, OUTPUT);
+  PI_PIN_MODE(dc_, OUTPUT);
+  PI_PIN_MODE(rst_, OUTPUT);
+  PI_PIN_MODE(cs_, OUTPUT);
 
   // toggle RST low to reset; CS low so it'll listen to us
-  if (cs_ > 0)  digitalWrite(cs_, LOW);
-  digitalWrite(rst_, LOW);
+  if (cs_ > 0)  PI_DIGITAL_OUT(cs_, LOW);
+  PI_DIGITAL_OUT(rst_, LOW);
   _delay_ms(500);
-  digitalWrite(rst_, HIGH);
+  PI_DIGITAL_OUT(rst_, HIGH);
   pi_lcd_contrast_(contrast);
   
   // Set display to normal mode.
@@ -1053,36 +1053,6 @@ void pi_lcd_setxaddr(uint8_t p) {
   pi_lcd_command(PI_LCD_SETXADDR | p);
 }
 
-/** This will draw one column of pixels. Because of the structure of the display, 
-* y is the the *row* coordinate, not the pixelwide Y coordinate, however,
-* X *is* the pixel coordinate.
-*/
-void pi_lcd_setone(uint8_t x, uint8_t y, uint8_t pixels) {
-  pi_lcd_setyaddr(y);
-  pi_lcd_setxaddr(x);
-  pi_lcd_data(pixels);
-}
-
-/** This will draw one column of pixels, combining it with a preexisting column, previous.
-* In this case, y is the real Y coordinate, not the row coordinate. Pixel coorinates are emulating 
-* by shift and combine operations.
-* Returns the upper byte blitted, which may be used on a next call of this function to preserve 
-* what the first call has drawn.
-*/
-uint8_t pi_lcd_blitone(uint8_t x, uint8_t y, uint8_t pixels, uint8_t previous) {
-  register uint8_t    row     = y / 8;
-  register uint8_t    shift   = y % 8;
-  register uint16_t   realpix = pixels;  
-  if(!pixels) return pixels;
-  realpix                   <<= ( 8 - shift);  // shift the pixel up as much is needed
-  realpix                    |= previous << 8; 
-  register uint8_t    low     = (uint8_t)(realpix & 255); // extract bottom part
-  register uint8_t    high    = (uint8_t)(realpix >>  8); // extract top part
-  pi_lcd_setone(x, row, high); // high contains the top part of the pixel column
-  if(shift)  pi_lcd_setone(x, row + 1, low);
-  // draw bottom part only if needed  
-  return high;
-}
 
 
 void pi_lcd_invert(void) {  
@@ -1115,11 +1085,66 @@ void pi_lcd_flush(void) {
 }    
 
 
+/** This will draw one column of pixels. Because of the structure of the display, 
+* y is the the *row* coordinate, not the pixelwide Y coordinate, however,
+* X *is* the pixel coordinate.
+*/
+void pi_lcd_setone(uint8_t x, uint8_t y, uint8_t pixels) {
+  pi_lcd_setyaddr(y);
+  pi_lcd_setxaddr(x);
+  pi_lcd_data(pixels);
+}
+
+/** This will draw one column of pixels, combining it with a preexisting column, previous.
+* In this case, y is the real Y coordinate, not the row coordinate. Pixel coorinates are emulating 
+* by shift and combine operations.
+* Returns the upper byte blitted, which may be used on a next call of this function to preserve 
+* what the first call has drawn.
+*/
+uint8_t pi_lcd_blitone(uint8_t x, uint8_t y, uint8_t pixels, uint8_t previous) {
+  register uint8_t    row     = y / 8;
+  register uint8_t    shift   = y % 8;
+  register uint16_t   realpix = pixels;  
+  if(!pixels) return pixels;
+  realpix                   <<= ( 8 - shift);  // shift the pixel up as much is needed
+  realpix                    |= previous << 8; 
+  register uint8_t    low     = (uint8_t)(realpix & 255); // extract bottom part
+  register uint8_t    high    = (uint8_t)(realpix >>  8); // extract top part
+  pi_lcd_setone(x, row, high); // high contains the top part of the pixel column
+  if(shift)  pi_lcd_setone(x, row + 1, low);
+  // draw bottom part only if needed  
+  return high;
+}
+
+/** Helper function that will shift the pixel in pixel p by shift and combine it with combine, and then return the  */
+
+
+/** This will draw one column of amount*8 pixels. In this case, y is the real Y coordinate, not the row coordinate. 
+* Pixel coordinates are emulated by shifting the bits around combine. Amount can be at most 8.
+*/
+void pi_lcd_blitcolumn(int8_t x, int8_t y, int8_t amount, uint8_t * pixels) {
+  register uint8_t    row     = y / 8;
+  register uint8_t    shift   = y % 8;
+  register uint64_t   aid     = 0;
+  register int        index;
+  register uint8_t    data    = 0;
+  for (index = 0; index < amount; index ++) {
+    aid |= (pixels[amount - index - 1] << (index*8));
+  }
+  aid  <<= (8-shift);
+  for (index = 0; index < amount; index ++) {
+    // data = pixels[index]; 
+    data = (aid >> ((amount - index - 1)*8)) & 255;
+    pi_lcd_setone(x, row + index, data);
+  }
+}
+
 
 /** Draws a bitmap (from program memory) in a primitive sort of way. */
 void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h, uint8_t color) {
-  for (uint8_t xx=0; xx < w; xx++ ) {  
-    for (uint8_t yy=0; yy < (h/8); yy++) {
+  int8_t xx, yy;
+  for (xx=0; xx < w; xx++ ) {  
+    for (yy=0; yy < (h/8); yy++) {
       uint16_t dif = yy + (xx*(h/8));
       uint8_t  byt = pgm_read_byte(bitmap + dif); 
       pi_lcd_setone(xx + x, yy + (y/8), byt);
@@ -1129,15 +1154,20 @@ void pi_lcd_rawblit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, ui
 }
 
 /** Draws a bitmap (from program memory). */
-void pi_lcd_blit_p(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h, uint8_t color) {
-  uint8_t rows = h/8;
-  for (uint8_t xx=0; xx < w; xx++ ) {
-    volatile uint8_t previous = 0;  
-    for (uint8_t yy=0; yy < rows; yy++) {
+void pi_lcd_blit_p(int8_t x, int8_t y, const uint8_t *bitmap, int8_t w, int8_t h, uint8_t color) {
+  int8_t  rows = h/8;
+  uint8_t pixels[8];
+  int8_t xx, yy;
+  for (xx=0; xx < w; xx++ ) {
+    for (yy=0; yy < rows; yy++) {
       uint16_t dif = yy + (xx*rows);
+      pixels[yy]   = pgm_read_byte(bitmap + dif); 
+      /* 
       uint8_t  byt = pgm_read_byte(bitmap + dif); 
       previous     = pi_lcd_blitone(xx + x, yy + y, byt, previous);
+      */
     }
+    pi_lcd_blitcolumn(xx + x, y, rows, pixels);
   }
   pi_lcd_flush();
 }

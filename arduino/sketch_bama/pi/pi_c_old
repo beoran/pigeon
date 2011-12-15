@@ -1,4 +1,5 @@
-#include "TimerOne.h"
+#ifdef JUST_A_TEST
+
 #include "pi.h"
 #include "pi_music.h"
 #include "pi_lcd.h"
@@ -84,68 +85,10 @@ static unsigned char __attribute__ ((progmem)) IMAGE_OBAMA_BMP[] = {
 , 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000011
 , 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000001
 , 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000001
-
 };
 
 
 
-#define LOGO16_GLCD_HEIGHT 16 
-#define LOGO16_GLCD_WIDTH  16 
-
-/*
-#define IMAGE_OBAMA_HIGH 48
-#define IMAGE_OBAMA_WIDE 48
-static unsigned char __attribute__ ((progmem)) IMAGE_OBAMA_BMP[] = {
-  0b00000000, 0b00000000, 0b00001111, 0b11110000, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b00110111, 0b11111100, 0b00000000, 0b00000000
-, 0b00000000, 0b00000000, 0b11111111, 0b11111110, 0b00000000, 0b00000000
-, 0b00000000, 0b00000001, 0b01011111, 0b11111111, 0b10000000, 0b00000000
-, 0b00000000, 0b00000011, 0b11111111, 0b11111111, 0b11000000, 0b00000000
-, 0b00000000, 0b00000101, 0b01111111, 0b11111111, 0b11100000, 0b00000000
-, 0b00000000, 0b00001111, 0b11111111, 0b11111111, 0b11110000, 0b00000000
-, 0b00000000, 0b00010111, 0b10000001, 0b11111111, 0b11111000, 0b00000000
-, 0b00000000, 0b00111100, 0b00000000, 0b00010000, 0b11111000, 0b00000000
-, 0b00000000, 0b00111000, 0b00000000, 0b00000000, 0b01011000, 0b00000000
-, 0b00000000, 0b01101000, 0b00000000, 0b00000000, 0b01111100, 0b00000000
-, 0b00000000, 0b01111000, 0b00000000, 0b00000000, 0b01101100, 0b00000000
-, 0b00000000, 0b01110000, 0b00000000, 0b00000000, 0b01111100, 0b00000000
-, 0b00000000, 0b01010000, 0b00000000, 0b00000000, 0b01110100, 0b00000000
-, 0b00000000, 0b01100000, 0b00000000, 0b00000000, 0b00111100, 0b00000000
-, 0b00000000, 0b01100000, 0b00000000, 0b00000000, 0b01011100, 0b00000000
-, 0b00000000, 0b01100000, 0b00000000, 0b00000000, 0b00011000, 0b00000000
-, 0b00000000, 0b00100001, 0b11100000, 0b00001111, 0b10011000, 0b00000000
-, 0b00000000, 0b01100011, 0b11110000, 0b00011111, 0b11001100, 0b00000000
-, 0b00000000, 0b10100110, 0b00000100, 0b10000000, 0b01101010, 0b00000000
-, 0b00000001, 0b00010000, 0b11100000, 0b10001110, 0b00001001, 0b00000000
-, 0b00000001, 0b01000001, 0b01000100, 0b10100101, 0b00010101, 0b00000000
-, 0b00000001, 0b01010000, 0b00010000, 0b10000000, 0b00010101, 0b00000000
-, 0b00000001, 0b00100000, 0b00000100, 0b10010000, 0b01001001, 0b00000000
-, 0b00000000, 0b10000100, 0b00100000, 0b01000101, 0b00001010, 0b00000000
-, 0b00000000, 0b10000000, 0b10001000, 0b01000000, 0b00001010, 0b00000000
-, 0b00000000, 0b01000000, 0b00000000, 0b00100000, 0b00010100, 0b00000000
-, 0b00000000, 0b01010000, 0b00010000, 0b00100000, 0b00010100, 0b00000000
-, 0b00000000, 0b00110000, 0b00001100, 0b11001000, 0b00011000, 0b00000000
-, 0b00000000, 0b00001000, 0b01000011, 0b00001000, 0b00010000, 0b00000000
-, 0b00000000, 0b00001000, 0b10000000, 0b00000100, 0b00100000, 0b00000000
-, 0b00000000, 0b00001000, 0b00000000, 0b00000010, 0b00100000, 0b00000000
-, 0b00000000, 0b00001001, 0b00000000, 0b00000011, 0b01000000, 0b00000000
-, 0b00000000, 0b00000100, 0b00011100, 0b11100010, 0b01000000, 0b00000000
-, 0b00000000, 0b00000101, 0b01111111, 0b11111010, 0b10000000, 0b00000000
-, 0b00000000, 0b00000010, 0b00011000, 0b01100001, 0b10000000, 0b00000000
-, 0b00000000, 0b00000011, 0b00001111, 0b11000011, 0b10000000, 0b00000000
-, 0b00000000, 0b00000010, 0b10000000, 0b00000010, 0b11000000, 0b00000000
-, 0b00000000, 0b00000010, 0b10000000, 0b00000101, 0b11100000, 0b00000000
-, 0b00000000, 0b00000010, 0b01000000, 0b00001110, 0b10010000, 0b00000000
-, 0b00000000, 0b00001110, 0b00100000, 0b00010101, 0b00011000, 0b00000000
-, 0b00000000, 0b01111101, 0b00010000, 0b00101010, 0b00111100, 0b00000000
-, 0b00000011, 0b11111101, 0b00001111, 0b11010100, 0b00111110, 0b00000000
-, 0b00011111, 0b11111100, 0b10000010, 0b10111000, 0b01111111, 0b00000000
-, 0b11111111, 0b11111100, 0b10000001, 0b01110000, 0b01111111, 0b11000000
-, 0b11111111, 0b11111100, 0b01000000, 0b11000000, 0b11111111, 0b11110000
-, 0b11111111, 0b11111100, 0b00100001, 0b00000000, 0b11111111, 0b11111100
-, 0b11111111, 0b11111100, 0b00010010, 0b00000001, 0b11111111, 0b11111111
-};
-*/
 
 /*
 X: 1
@@ -163,15 +106,14 @@ K: Bb
 */
 
 
-
-
 uint8_t PROGMEM MUSIC_HAIL_TO_THE_CHIEF3[] = {
-/*  PI_R, PI_1_4 
+  PI_R, PI_1_4 
  ,PI_D, PI_3_16, PI_D, PI_1_16, PI_D, PI_1_16, PI_D, PI_1_8, PI_D, PI_1_8, PI_G, PI_1_4, PI_R, PI_1_4
  ,PI_D, PI_3_16, PI_D, PI_1_16, PI_D, PI_1_16, PI_D, PI_1_8, PI_D, PI_1_8, PI_G, PI_1_4, PI_R, PI_1_4
  ,PI_D, PI_3_16, PI_D, PI_1_16, PI_D, PI_1_16, PI_D, PI_1_8, PI_D, PI_1_8, PI_G, PI_1_4, PI_R, PI_1_4
  ,PI_D, PI_3_16, PI_D, PI_1_16, PI_D, PI_1_16, PI_D, PI_1_8, PI_D, PI_1_8, PI_G, PI_1_4, PI_R, PI_1_4
-*/ 
+ ,
+
   PI_R, PI_1_2
 , PI_G4, PI_1_4, PI_A4, PI_3_16, PI_B4, PI_1_16, PI_C5, PI_1_4, PI_B4, PI_3_16, PI_A4, PI_1_16
 , PI_G4, PI_3_16, PI_A4, PI_1_16, PI_G4, PI_3_16, PI_E4, PI_1_16, PI_D4, PI_1_4, PI_C4, PI_1_4
@@ -234,24 +176,6 @@ void pi_key_init() {
   /*
   pinMode(A4, INPUT); 
   // in the prototype this is wired though a pull down, in the breadboard not    
-  digitalWrite(A4,HIGH); // enble pull-up resistor
-  // it should be changed in the final design
-  pinMode(A3, INPUT);
-  digitalWrite(A3,HIGH); // enble pull-up resistor
-  pinMode(A2, INPUT);
-  digitalWrite(A2, HIGH); // enble pull-up resistor
-  pinMode(A1, INPUT);
-  digitalWrite(A1,HIGH); // enble pull-up resistor
-  pinMode(A0, INPUT);
-  digitalWrite(A0,HIGH); // enble pull-up resistor
-  pinMode(7, INPUT);
-  digitalWrite(7,HIGH); // enble pull-up resistor
-  pinMode(7, INPUT);
-  digitalWrite(7,HIGH); // enble pull-up resistor
-  pinMode(11, INPUT);
-  digitalWrite(11,HIGH); // enble pull-up resistor
-  pinMode(13, INPUT);
-  digitalWrite(13,HIGH); // enble pull-up resistor
   */
 }
 
@@ -295,6 +219,36 @@ char pi_key_y() {
 }
 
 
+void draw_obama(void) {
+  pi_lcd_rawblit_p(10, 0, IMAGE_OBAMA_BMP, IMAGE_OBAMA_WIDE, IMAGE_OBAMA_HIGH, BLACK);
+  pi_lcd_puts(3, 0, "Hello!");
+  // pi_lcd_putc(0, 0, '!');
+  
+  /*
+  lcd.clear();
+  #ifdef DYMO
+  for(int i = -32 ; i < 1; i ++) {  
+    lcd.clear();
+//    my_drawbitmap(-10, i-1, IMAGE_DYMO_BMP, IMAGE_DYMO_WIDE, IMAGE_DYMO_HIGH, WHITE);
+    my_drawbitmap(0, i, IMAGE_DYMO_BMP, IMAGE_DYMO_WIDE, IMAGE_DYMO_HIGH, BLACK);    
+    lcd.display();
+    // delay(100);    
+  }  
+  #else
+
+  #endif
+  #ifdef DYMO
+  lcd.setCursor(0, 34);
+  lcd.println("BDM 0528");
+  #else
+  lcd.setCursor(48, 10);
+  lcd.println("Obama!");
+  #endif
+  lcd.display();
+  */
+}
+
+
 void setup(void) {
   // pinMode(ledPin, OUTPUT);  
   pi_music_init(MUSIC_HAIL_TO_THE_CHIEF3, MUSIC_HAIL_TO_THE_CHIEF3_SIZE);
@@ -311,7 +265,7 @@ void setup(void) {
   
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  // pi_lcd_contrast(50);
+  // pi_lcd_contrast_(40);
   // lcd.setContrast(50);
   // turn all the pixels on (a handy test)
   // lcd.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
@@ -393,34 +347,6 @@ void setup(void) {
 }
 
 
-void draw_obama(void) {
-  pi_lcd_rawblit_p(10, 0, IMAGE_OBAMA_BMP, IMAGE_OBAMA_WIDE, IMAGE_OBAMA_HIGH, BLACK);
-  pi_lcd_puts(0, 0, "Hello!");
-  // pi_lcd_putc(0, 0, '!');
-  
-  /*
-  lcd.clear();
-  #ifdef DYMO
-  for(int i = -32 ; i < 1; i ++) {  
-    lcd.clear();
-//    my_drawbitmap(-10, i-1, IMAGE_DYMO_BMP, IMAGE_DYMO_WIDE, IMAGE_DYMO_HIGH, WHITE);
-    my_drawbitmap(0, i, IMAGE_DYMO_BMP, IMAGE_DYMO_WIDE, IMAGE_DYMO_HIGH, BLACK);    
-    lcd.display();
-    // delay(100);    
-  }  
-  #else
-
-  #endif
-  #ifdef DYMO
-  lcd.setCursor(0, 34);
-  lcd.println("BDM 0528");
-  #else
-  lcd.setCursor(48, 10);
-  lcd.println("Obama!");
-  #endif
-  lcd.display();
-  */
-}
 
 void check_key(int res, char * buf, int index, char chon, int choff) {
   if(res) {
@@ -429,6 +355,9 @@ void check_key(int res, char * buf, int index, char chon, int choff) {
     buf[index] = choff;
   }  
 }
+
+char player_x = 0;
+char player_y = 0;
 
 void loop(void) {
   pi_music_update();  
@@ -442,7 +371,16 @@ void loop(void) {
   check_key(pi_key_b()    , buf, 5, 'B', 'b');
   check_key(pi_key_x()    , buf, 6, 'X', 'x');
   check_key(pi_key_y()    , buf, 7, 'Y', 'y');
-  pi_lcd_puts(0, 0, buf);
+  pi_lcd_puts(12, 26, buf);
+  if(pi_key_y())     { pi_lcd_invert();  }  
+  if(pi_key_x())     { pi_lcd_normal();  }
+  if(pi_key_up())    { player_x++;       }  
+  if(pi_key_down())  { player_x--;       }
+  if(pi_key_left())  { player_y--;       }
+  if(pi_key_right()) { player_y++;       }
+  
+    
+  pi_lcd_putsprite(player_x, player_y, 0);
   /*
   lcd.println(buf);        
   lcd.display();
@@ -450,4 +388,14 @@ void loop(void) {
 }
 
 
+#else
+
+int main(void) {
+  while(1) {
+    
+  }
+  return 0;
+}
+
+#endif
 

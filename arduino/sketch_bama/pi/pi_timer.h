@@ -11,7 +11,7 @@ void          pi_timer1_pwm(char pin, int duty);
 void          pi_timer1_pwmoff(char pin);
 void          pi_timer1_period_(long microseconds);
 void          pi_timer1_pwmduty_(char pin, int duty);
-void          pi_timer1_attach(void (*isr), long microseconds);
+void          pi_timer1_attach(void (*isr)(void), long microseconds);
 void          pi_timer1_detach();
 
 

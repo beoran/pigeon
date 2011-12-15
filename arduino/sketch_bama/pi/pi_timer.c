@@ -12,18 +12,7 @@ static unsigned char pi_timer1_clockbits       = 0;
 static unsigned char pi_timer1_oldsreg         = 0;
 static void        (*pi_timer1_isr)(void)      = NULL;
 
-void          pi_timer1_init(long microseconds);
-void          pi_timer1_start(void);
-void          pi_timer1_stop(void);
-void          pi_timer1_resume(void);
-unsigned long pi_timer1_read(void);
-void          pi_timer1_pwmon(char pin, int duty, long microseconds);
-void          pi_timer1_pwm(char pin, int duty);
-void          pi_timer1_pwmoff(char pin);
-void          pi_timer1_period_(long microseconds);
-void          pi_timer1_pwmduty_(char pin, int duty);
-void          pi_timer1_attach(void (*isr), long microseconds);
-void          pi_timer1_detach(void);
+
 
 // set up timer interrupt handler
 ISR(TIMER1_OVF_vect)     {
@@ -118,7 +107,7 @@ void pi_timer1_pwmoff(char pin) {
    }     
 }
 
-void pi_timer1_attach(void (*isr)(), long microseconds) {
+void pi_timer1_attach(void (*isr)(void), long microseconds) {
   pi_timer1_period_(microseconds);
   pi_timer1_isr = isr;  // set interrupt request routine                                     
   TIMSK1 |= _BV(TOIE1); // enable interrupt on clock overflow                                     
